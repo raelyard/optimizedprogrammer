@@ -1,28 +1,77 @@
 ---
 layout: null
-title : RSS Feed
+header: Subscribe
+redirect_from:
+  - /rss/
+  - /feed/
+  - /feed.rss/
+  - /feed.xml/
 ---
-
-<?xml version="1.0" encoding="UTF-8" ?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
-<channel>
-        <title>{{ site.title | xml_escape }}</title>
-        <description>{{ site.title | xml_escape }} - {{ site.author.name | xml_escape }}</description>
-        <link>{{ site.production_url }}</link>
-        <atom:link href="{{ site.production_url }}{{ site.JB.rss_path }}" rel="self" type="application/rss+xml" />
-        <lastBuildDate>{{ site.time | date_to_rfc822 }}</lastBuildDate>
-        <pubDate>{{ site.time | date_to_rfc822 }}</pubDate>
-        <ttl>60</ttl>
-
-{% for post in site.posts limit:20 %}
-        <item>
-                <title>{{ post.title | xml_escape }}</title>
-                <description>{{ post.content | xml_escape }}</description>
-                <link>{{ site.production_url }}{{ post.url }}</link>
-                <guid>{{ site.production_url }}{{ post.id }}</guid>
-                <pubDate>{{ post.date | date_to_rfc822 }}</pubDate>
-        </item>
-{% endfor %}
-
-</channel>
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:media="http://search.yahoo.com/mrss/" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd">
+	<channel>
+		<title>{{ site.title | xml_escape }}</title>
+		<description>{{ site.description | xml_escape }}</description>
+		<itunes:summary>{{ site.description | xml_escape }}</itunes:summary>
+		<media:description>{{ site.description | xml_escape }}</media:description>
+  	<atom10:link xmlns:atom10="http://www.w3.org/2005/Atom" rel="self" type="application/rss+xml" href="http://developeronfire.com/rss.xml" />
+  	<atom10:link xmlns:atom10="http://www.w3.org/2005/Atom" rel="hub" href="http://pubsubhubbub.appspot.com/" />
+		<media:copyright>{{ 'now' | date: "%Y" }} {{ site.organizationName | xml_escape }}</media:copyright>
+		<copyright>{{ 'now' | date: "%Y" }} {{ site.organizationName | xml_escape }}</copyright>
+  	<media:thumbnail url="{{ site.url }}{{ site.squareLogo}}" />
+  	<media:keywords>{{ site.keywords }}</media:keywords>
+    {% for category in site.podcast.categories %}
+      {% if category[1] == empty or category[1] == "" or category[1] == nil %}
+    	   <media:category scheme="http://www.itunes.com/dtds/podcast-1.0.dtd">{{category[0]}}</media:category>
+      {% else %}
+        {% for subcategory in category[1] %}
+      	   <media:category scheme="http://www.itunes.com/dtds/podcast-1.0.dtd">{{category[0]}}/{{subcategory}}</media:category>
+        {% endfor %}
+      {% endif %}
+    {% endfor %}
+		<link>{{ site.url }}</link>
+		<language>en</language>
+		<pubDate>{{ site.time | date: "%a, %d %b %Y %H:%M:%S GMT" }}</pubDate>
+		<lastBuildDate>{{ site.time | date: "%a, %d %b %Y" }}</lastBuildDate>
+		<image>
+			<link>{{ site.url}}</link>
+			<url>{{ site.url }}{{ site.squareLogo}}</url>
+			<title>{{ site.title }}</title>
+		</image>
+		<itunes:subtitle>{{ site.podcastSubtitle }}</itunes:subtitle>
+		<itunes:author>{{ site.author.name }}</itunes:author>
+		<itunes:keywords>{{ site.keywords }}</itunes:keywords>
+		<itunes:owner>
+			<itunes:name>{{ site.author.name}}</itunes:name>
+			<itunes:email>{{ site.email}}</itunes:email>
+		</itunes:owner>
+    <itunes:explicit>no</itunes:explicit>
+		<itunes:image href="{{ site.url }}{{ site.squareLogo}}" />
+    {% for category in site.podcast.categories %}
+      <itunes:category text="{{ category[0] }}">
+        {% for subcategory in category[1] %}
+          <itunes:category text="{{ subcategory }}" />
+        {% endfor %}
+      </itunes:category>
+    {% endfor %}
+    <media:credit role="author">{{ site.author.name }}</media:credit>
+    <media:rating>nonadult</media:rating>
+		{% for post in site.posts %}
+			<item>
+				<title>{{ post.title }}</title>
+				<link>{{ site.url }}{{ post.url }}</link>
+				<pubDate>{{ post.date | date: "%a, %d %b %Y %H:%M:%S GMT" }}</pubDate>
+				<description>{{ post.content | xml_escape }}</description>
+				<guid isPermaLink="true">{% if post.guid %}"{{ post.guid }}"{% else %}{{ post.link }}{% endif %}</guid>
+				<enclosure url="{{ post.link }}" length="{{ post.length }}" type="audio/mp3"/>
+				<itunes:author>{{ post.speaker }}</itunes:author>
+				<itunes:subtitle>{{ post.subtitle }}</itunes:subtitle>
+				<itunes:summary>{{ post.content | xml_escape }}</itunes:summary>
+				<itunes:duration>{{ post.duration }}</itunes:duration>
+				<itunes:keywords>{{ site.keywords }}</itunes:keywords>
+				<itunes:image href="{% if post.image %}{{ site.url }}{{ post.image }}{% else %}{{ site.url }}{{site.squareLogo}}{% endif %}" />
+				<itunes:explicit>no</itunes:explicit>
+			</item>
+		{% endfor %}
+	</channel>
 </rss>
